@@ -304,7 +304,7 @@ def api_status():
     return jsonify({
         'buscando': estado['buscando'],
         'enviando': estado['enviando'],
-        'vagas_encontradas': estado['vagas_encontradas'],
+        'vagas_encontradas': estado.get('vagas_encontradas', 0),
         'enviados_email': estado['enviados_email'],
         'enviados_wpp': estado['enviados_wpp'],
         'ultima_busca': estado['ultima_busca'],

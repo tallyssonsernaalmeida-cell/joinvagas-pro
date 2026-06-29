@@ -410,8 +410,8 @@ input:focus, select:focus { border-color: var(--accent); }
         <div class="action-card">
           <h3><i class="fas fa-paper-plane"></i> Enviar Currículos</h3>
           <p>Envia o currículo por e-mail e WhatsApp para todos os contatos extraídos.</p>
-          <label class="checkbox-label"><input type="checkbox" id="modo-teste"> Modo Teste — Simular envio</label>
-          <button class="btn btn-warning" id="btn-enviar" onclick="iniciarEnvio()"><i class="fas fa-rocket"></i> Enviar Currículos</button>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px">✅ Selecione as vagas em "Vagas Encontradas" e clique abaixo para enviar</p>
+          <button class="btn btn-warning" id="btn-enviar" onclick="iniciarEnvio()"><i class="fas fa-paper-plane"></i> Iniciar Envio Automatizado</button>
         </div>
       </div>
       <div class="panel">
@@ -447,8 +447,8 @@ input:focus, select:focus { border-color: var(--accent); }
         </div>
         <div class="table-wrapper">
           <table>
-            <thead><tr><th>Cargo</th><th>Empresa</th><th>Bairro</th><th>Salário</th><th>Contrato</th><th>Contato</th><th>Período</th><th>Data</th></tr></thead>
-            <tbody id="tabela-vagas"><tr><td colspan="8"><div class="empty-state"><i class="fas fa-inbox"></i>Execute a busca para ver as vagas aqui</div></td></tr></tbody>
+            <thead><tr><th><input type="checkbox" id="select-all" onclick="toggleAll()" title="Selecionar todas"></th><th>Cargo</th><th>Empresa</th><th>Bairro</th><th>Salário</th><th>Contrato</th><th>Contato</th><th>Período</th><th>Data</th></tr></thead>
+            <tbody id="tabela-vagas" style="cursor:pointer"><tr><td colspan="8"><div class="empty-state"><i class="fas fa-inbox"></i>Execute a busca para ver as vagas aqui</div></td></tr></tbody>
           </table>
         </div>
       </div>
