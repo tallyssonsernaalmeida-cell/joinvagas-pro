@@ -25,6 +25,8 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from werkzeug.security import generate_password_hash, check_password_hash
 import os, json, uuid, threading, queue, sys, subprocess, shutil
 from datetime import datetime
+from flask_cors import CORS
+CORS(app)
 
 # ════════════════ CONFIGURAÇÃO ════════════════
 app = Flask(__name__)
