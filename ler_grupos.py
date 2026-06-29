@@ -173,8 +173,12 @@ class BuscadorVagasCompleto:
         self.nome_periodo = nome_periodo
         
     async def conectar(self):
-        await self.client.start(PHONE)
-        print("✅ Conectado ao Telegram!")
+        try:
+            await self.client.start(phone=PHONE)
+            print("✅ Conectado ao Telegram!")
+        except Exception as e:
+            print(f"⚠️ Erro na conexao: {e}")
+            print("⚠️ Usando sessao existente...")
     
     # ════════════════ CLASSIFICAÇÃO ════════════════
     
