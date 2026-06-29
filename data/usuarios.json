@@ -1,0 +1,11 @@
+{
+  "31b170ad-4d45-4224-9098-c0e5d87dea6f": {
+    "username": "Admin",
+    "email": "admin@vagasbot.com",
+    "senha": "scrypt:32768:8:1$7nrjl2OMe6kq5i5A$3b66688b75503aa2d9dde330f70cfb0cc4d658cdbc65d3a1b39d97db3ffe783a6d195dc2ec9e6e6908713613ae8c7731d069892c9baca4ee819414c62133066a",
+    "plano": "admin",
+    "data_criacao": "2026-06-29T12:30:56.650157",
+    "ultimo_login": "2026-06-29T16:23:12.303919",
+    "ativo": true
+  }
+}

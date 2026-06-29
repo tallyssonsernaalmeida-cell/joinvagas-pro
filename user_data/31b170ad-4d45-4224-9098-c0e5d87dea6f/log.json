@@ -1,0 +1,332 @@
+[
+  {
+    "hora": "16:13:19",
+    "msg": "🗑️ Log limpo pelo usuário",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:38",
+    "msg": "Iniciando envio manual...",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:54",
+    "msg": ">> CAÇADOR DE VAGAS - Joinville/SC",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:54",
+    "msg": "Tallysson Serna Almeida",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:54",
+    "msg": "tallyssonsernaalmeida@gmail.com",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:54",
+    "msg": "Boa tarde! Tudo bem?",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:54",
+    "msg": "[1] PIPELINE COMPLETO",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:54",
+    "msg": "[2] So BUSCAR vagas",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:54",
+    "msg": "[3] So ENVIAR (ja tenho CSV)",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:54",
+    "msg": "[4] Ver LOG",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:54",
+    "msg": "[5] MODO TESTE",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:54",
+    "msg": "[6] Limpar LOG",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:54",
+    "msg": "[0] Sair",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:54",
+    "msg": "Escolha:",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:54",
+    "msg": ">> PIPELINE - 29/06/2026 16:19",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:54",
+    "msg": "[TG] PASSO 1: Buscando vagas do Telegram",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:54",
+    "msg": "Buscando vagas...",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "[1] 📅 Desde 01/06/2026 até HOJE",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "[2] 📆 Últimos 30 dias",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "[3] 📆 Últimos 60 dias",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "[4] 📆 Últimos 90 dias",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "[5] 🗓️  Mês atual",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "[6] 🔙 Últimos 7 dias",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "[0] Sair",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "Escolha:",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "[OK] Planilha: VAGAS_ADMIN_MES_JUNE2026_20260629_1344.csv",
+    "tipo": "success"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "[DATA] PASSO 2: Extraindo contatos",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "Ja enviados: 0",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "[OK] 84 NOVOS contatos",
+    "tipo": "success"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "[WPP] WhatsApp: 82",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "[@] Email: 6",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "[...] PASSO 3: Gerando mensagens",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "Saudacao: Boa tarde! Tudo bem?",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "[OK] 84 mensagens geradas",
+    "tipo": "success"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "[@] PASSO 4: Enviando",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "[DATA] 84 mensagens",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "[AVISO] Digite 'ENVIAR' para confirmar:",
+    "tipo": "warning"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": ">",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "[@] Conectando Gmail...",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "[OK] Conectado!",
+    "tipo": "success"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "[1/84] Para Restaurante Na Zona Norte De Joinville",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "[WPP] (47) 999020559... [OK]",
+    "tipo": "success"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "Traceback (most recent call last):",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "File \"C:\\Vagasjoinville\\rodar_tudo.py\", line 326, in <module>",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "main()",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "~~~~^^",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "File \"C:\\Vagasjoinville\\rodar_tudo.py\", line 300, in main",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "~~~~~~~~^^",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "File \"C:\\Vagasjoinville\\rodar_tudo.py\", line 276, in pipeline",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "enviar(mensagens)",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "~~~~~~^^^^^^^^^^^",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "File \"C:\\Vagasjoinville\\rodar_tudo.py\", line 260, in enviar",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "time.sleep(PAUSA_WPP)",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "^^^^^^^^^",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "NameError: name 'PAUSA_WPP' is not defined",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:19:55",
+    "msg": "Envio concluido!",
+    "tipo": "success"
+  },
+  {
+    "hora": "16:23:18",
+    "msg": "Iniciando envio manual...",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:24:12",
+    "msg": ">> JoinVagas PRO - Joinville/SC",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:24:12",
+    "msg": "Tallysson Serna Almeida",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:24:12",
+    "msg": "tallyssonsernaalmeida@gmail.com",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:24:12",
+    "msg": "Boa tarde! Tudo bem?",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:24:12",
+    "msg": "[1] PIPELINE COMPLETO (Buscar + Enviar)",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:24:12",
+    "msg": "[2] Só BUSCAR vagas",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:24:12",
+    "msg": "[3] Só ENVIAR (já tenho CSV)",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:24:12",
+    "msg": "[4] Ver LOG de envios",
+    "tipo": "info"
+  },
+  {
+    "hora": "16:24:12",
+    "msg": "[5] MODO TESTE (simular)",
+    "tipo": "info"
+  }
+]

@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JoinVagas PRO — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+:root {
+  --bg-primary: #060b1a;
+  --bg-secondary: #0a1030;
+  --bg-tertiary: #111840;
+  --bg-card: #151d45;
+  --bg-card-hover: #1a2350;
+  --border-color: #1e2a55;
+  --border-light: #263065;
+  --text-primary: #e8edf5;
+  --text-secondary: #94a3c0;
+  --text-muted: #5c6e8f;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --accent-dim: rgba(59, 130, 246, 0.1);
+  --accent-glow: rgba(59, 130, 246, 0.2);
+  --success: #10b981;
+  --success-dim: rgba(16, 185, 129, 0.1);
+  --warning: #f59e0b;
+  --warning-dim: rgba(245, 158, 11, 0.1);
+  --danger: #ef4444;
+  --danger-dim: rgba(239, 68, 68, 0.1);
+  --info: #06b6d4;
+  --info-dim: rgba(6, 182, 212, 0.1);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --gradient-accent: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  --sans: 'Inter', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: var(--sans);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  display: flex;
+}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+
+/* SIDEBAR */
+.sidebar {
+  width: 240px; min-width: 240px;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  display: flex; flex-direction: column;
+  height: 100vh; position: sticky; top: 0; z-index: 100;
+}
+.sb-header { padding: 24px 20px; border-bottom: 1px solid var(--border-color); }
+.sb-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.sb-logo-icon {
+  width: 36px; height: 36px;
+  background: var(--gradient-accent);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+.sb-logo-text { font-size: 18px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.3px; }
+.sb-subtitle { font-size: 11px; color: var(--text-muted); margin-top: 4px; padding-left: 46px; }
+.sb-nav { padding: 16px 12px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-radius: var(--radius-sm);
+  cursor: pointer; font-size: 13.5px; color: var(--text-secondary);
+  transition: all 0.15s ease; text-decoration: none;
+  border: none; background: none; width: 100%;
+  font-family: var(--sans); font-weight: 500;
+}
+.nav-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+.nav-item.active { background: var(--accent-dim); color: var(--accent); font-weight: 600; }
+.nav-item i { font-size: 16px; width: 20px; text-align: center; }
+.nav-divider { height: 1px; background: var(--border-color); margin: 8px 0; }
+.sb-footer { padding: 16px 20px; border-top: 1px solid var(--border-color); }
+.sb-user { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.sb-avatar {
+  width: 32px; height: 32px;
+  background: var(--gradient-accent);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 600;
+}
+.sb-user-info { flex: 1; }
+.sb-user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.sb-user-plan { font-size: 11px; color: var(--text-muted); }
+.sb-user-plan.premium { color: var(--warning); }
+.sb-logout {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border-radius: 6px;
+  font-size: 12px; color: var(--text-muted);
+  text-decoration: none; transition: all 0.15s;
+}
+.sb-logout:hover { background: var(--danger-dim); color: var(--danger); }
+
+/* MAIN */
+.main { flex: 1; display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; }
+.topbar {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 16px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.topbar-left { display: flex; align-items: center; gap: 16px; }
+.topbar-title { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+.topbar-badge {
+  padding: 4px 10px; border-radius: 100px;
+  font-size: 11px; font-weight: 600;
+  background: var(--accent-dim); color: var(--accent);
+}
+.topbar-right { display: flex; align-items: center; gap: 20px; }
+.status-dot { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-light); flex-shrink: 0; }
+.dot.active { background: var(--accent); box-shadow: 0 0 8px var(--accent-glow); animation: pulse 2s ease infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+.clock { font-family: var(--mono); font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+.clock i { color: var(--accent); font-size: 14px; }
+.content { padding: 24px 28px; flex: 1; overflow-y: auto; }
+
+/* SECTIONS */
+.section { display: none; }
+.section.active { display: block; }
+
+/* STATS */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: var(--radius); padding: 20px 24px;
+  transition: all 0.2s ease; position: relative; overflow: hidden;
+}
+.stat-card:hover { border-color: var(--border-light); background: var(--bg-card-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); }
+.stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 12px; }
+.stat-icon.blue { background: var(--accent-dim); color: var(--accent); }
+.stat-icon.green { background: var(--success-dim); color: var(--success); }
+.stat-icon.cyan { background: var(--info-dim); color: var(--info); }
+.stat-icon.orange { background: var(--warning-dim); color: var(--warning); }
+.stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
+.stat-value { font-size: 28px; font-weight: 700; color: var(--text-primary); line-height: 1; margin-bottom: 4px; }
+.stat-sub { font-size: 11.5px; color: var(--text-muted); }
+
+/* ACTIONS */
+.actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.action-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 24px; }
+.action-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.action-card h3 i { font-size: 18px; color: var(--accent); }
+.action-card p { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.6; }
+
+/* PERIOD PILLS */
+.period-selector { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.period-btn {
+  padding: 6px 14px; border-radius: 100px;
+  border: 1px solid var(--border-color);
+  background: transparent; color: var(--text-secondary);
+  font-size: 12px; cursor: pointer; transition: all 0.15s;
+  font-family: var(--sans); font-weight: 500;
+}
+.period-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+.period-btn.selected { background: var(--accent); color: white; border-color: var(--accent); }
+
+/* BUTTONS */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 18px; border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  border: 1px solid transparent; transition: all 0.2s;
+  font-family: var(--sans); text-decoration: none; letter-spacing: 0.3px;
+}
+.btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+.btn-primary { background: var(--gradient-accent); color: white; border-color: var(--accent); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+.btn-primary:hover { box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4); transform: translateY(-1px); }
+.btn-warning { background: var(--warning); color: #000; border-color: var(--warning); font-weight: 600; }
+.btn-outline { background: transparent; border-color: var(--border-light); color: var(--text-secondary); }
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+.btn-danger { background: transparent; border-color: var(--danger); color: var(--danger); }
+.btn-danger:hover { background: var(--danger-dim); }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+
+/* PANEL */
+.panel { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); overflow: hidden; }
+.panel-header {
+  padding: 16px 20px; border-bottom: 1px solid var(--border-color);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.panel-header h3 { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.panel-body { padding: 20px; }
+
+/* LOG */
+.log-container {
+  background: var(--bg-secondary); border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color); padding: 14px;
+  height: 280px; overflow-y: auto;
+  font-family: var(--mono); font-size: 11.5px; line-height: 1.7;
+}
+.log-entry { display: flex; gap: 10px; padding: 3px 0; }
+.log-time { color: var(--text-muted); flex-shrink: 0; font-size: 11px; }
+.log-msg.info { color: var(--text-secondary); }
+.log-msg.success { color: var(--success); }
+.log-msg.error { color: var(--danger); }
+.log-msg.warning { color: var(--warning); }
+
+/* TABLE */
+.table-wrapper { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th {
+  text-align: left; padding: 12px 16px;
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.7px;
+  color: var(--text-muted); border-bottom: 1px solid var(--border-color);
+  font-weight: 600; background: var(--bg-tertiary);
+}
+tbody td { padding: 12px 16px; border-bottom: 1px solid rgba(30, 40, 80, 0.4); vertical-align: middle; color: var(--text-secondary); }
+tbody tr { cursor: pointer; }
+tbody tr:hover td { background: rgba(59, 130, 246, 0.03); }
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 13px; }
+.empty-state i { font-size: 32px; margin-bottom: 12px; display: block; opacity: 0.5; }
+
+/* BADGES */
+.badge { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 10.5px; font-weight: 600; white-space: nowrap; }
+.badge-blue { background: var(--accent-dim); color: var(--accent); }
+.badge-green { background: var(--success-dim); color: var(--success); }
+.badge-orange { background: var(--warning-dim); color: var(--warning); }
+.badge-red { background: var(--danger-dim); color: var(--danger); }
+.badge-cyan { background: var(--info-dim); color: var(--info); }
+.badge-dark { background: var(--bg-tertiary); color: var(--text-muted); }
+
+/* FILTER BAR */
+.filter-bar { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--border-color); }
+.filter-bar input {
+  flex: 1; background: var(--bg-tertiary); border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm); padding: 9px 14px;
+  font-size: 13px; color: var(--text-primary); font-family: var(--sans); outline: none;
+}
+.filter-bar input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+.filter-bar select {
+  background: var(--bg-tertiary); border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm); padding: 9px 14px;
+  font-size: 13px; color: var(--text-primary); font-family: var(--sans); outline: none; cursor: pointer;
+}
+.counter-badge {
+  background: var(--accent-dim); border: 1px solid var(--accent);
+  border-radius: 100px; padding: 3px 12px;
+  font-size: 11px; color: var(--accent); font-weight: 600;
+}
+
+/* UPLOAD ZONE */
+.upload-zone {
+  border: 2px dashed var(--border-light); border-radius: var(--radius);
+  padding: 32px; text-align: center; cursor: pointer; transition: all 0.2s;
+}
+.upload-zone:hover { border-color: var(--accent); background: var(--accent-dim); }
+.upload-zone i { font-size: 36px; color: var(--accent); margin-bottom: 8px; }
+.upload-zone p { font-size: 13px; color: var(--text-secondary); }
+
+/* MODAL */
+.modal-overlay {
+  display: none; position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%; background: rgba(0,0,0,0.85);
+  z-index: 9999; align-items: center; justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal-content {
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: var(--radius); padding: 28px;
+  max-width: 750px; width: 90%; max-height: 85vh;
+  overflow-y: auto; position: relative;
+}
+.modal-close {
+  position: absolute; top: 12px; right: 16px;
+  background: none; border: none; color: var(--text-muted);
+  font-size: 28px; cursor: pointer;
+}
+.modal-close:hover { color: var(--danger); }
+.modal-content h2 { font-size: 20px; color: var(--text-primary); margin-bottom: 16px; padding-right: 30px; }
+.modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.modal-grid div { padding: 8px 0; }
+.modal-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); font-weight: 600; }
+.modal-value { font-size: 14px; color: var(--text-primary); margin-top: 2px; }
+.modal-section { margin-bottom: 16px; }
+.modal-section strong { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 6px; }
+.modal-section p { font-size: 13px; color: var(--text-secondary); line-height: 1.7; }
+.modal-actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+.modal-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 6px; font-size: 12px;
+  font-weight: 600; text-decoration: none; transition: all 0.2s;
+  border: 1px solid var(--border-color);
+}
+.modal-btn-wpp { background: #25D366; color: white; border-color: #25D366; }
+.modal-btn-email { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+.modal-btn-tg { background: #2AABEE; color: white; border-color: #2AABEE; }
+
+/* FORM */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-group label { font-size: 11.5px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+input[type="text"], input[type="email"], input[type="url"], select {
+  background: var(--bg-tertiary); border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm); padding: 10px 14px;
+  font-size: 13.5px; color: var(--text-primary); font-family: var(--sans); outline: none;
+}
+input:focus, select:focus { border-color: var(--accent); }
+
+/* SPINNER */
+.spinner { width: 16px; height: 16px; border: 2px solid var(--border-color); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* TOAST */
+#toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+  background: var(--bg-card); border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm); padding: 14px 20px;
+  font-size: 13px; display: none; align-items: center; gap: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+#toast.show { display: flex; }
+
+/* UTILS */
+.mt-2 { margin-top: 12px; } .mt-3 { margin-top: 20px; }
+.flex-row { display: flex; align-items: center; gap: 10px; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.checkbox-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12.5px; color: var(--text-secondary); margin-bottom: 16px; }
+.info-list { list-style: none; font-size: 13px; color: var(--text-secondary); line-height: 2.2; }
+.info-list li::before { content: '▸ '; color: var(--accent); font-weight: bold; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-header">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">⚡</div>
+      <div class="sb-logo-text">JoinVagas PRO</div>
+    </div>
+    <div class="sb-subtitle">Painel de Controle</div>
+  </div>
+  <nav class="sb-nav">
+    <button class="nav-item active" onclick="navigate('dashboard')"><i class="fas fa-th-large"></i> Painel</button>
+    <button class="nav-item" onclick="navigate('vagas')"><i class="fas fa-briefcase"></i> Vagas Encontradas</button>
+    <button class="nav-item" onclick="navigate('contatos')"><i class="fas fa-address-book"></i> Contatos</button>
+    <button class="nav-item" onclick="navigate('envios')"><i class="fas fa-paper-plane"></i> Log de Envios</button>
+    <div class="nav-divider"></div>
+    <button class="nav-item" onclick="navigate('config')"><i class="fas fa-cog"></i> Configurações</button>
+    <a href="/planos" class="nav-item"><i class="fas fa-crown"></i> Planos</a>
+  </nav>
+  <div class="sb-footer">
+    <div class="sb-user">
+      <div class="sb-avatar">{{ user.username[0] | upper }}</div>
+      <div class="sb-user-info">
+        <div class="sb-user-name">{{ user.username }}</div>
+        <div class="sb-user-plan {% if user.is_premium() %}premium{% endif %}">
+          {% if user.is_premium() %}⭐ Premium{% else %}🆓 Gratuito{% endif %}
+        </div>
+      </div>
+    </div>
+    <a href="/logout" class="sb-logout"><i class="fas fa-sign-out-alt"></i> Sair da conta</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1 class="topbar-title" id="page-title">Painel</h1>
+      {% if user.is_premium() %}<span class="topbar-badge">⭐ Premium</span>{% endif %}
+    </div>
+    <div class="topbar-right">
+      <div class="status-dot"><div class="dot" id="dot-busca"></div><span id="status-busca">Inativo</span></div>
+      <div class="status-dot"><div class="dot" id="dot-envio"></div><span id="status-envio">Inativo</span></div>
+      <div class="clock"><i class="far fa-clock"></i><span id="clock-display">00:00</span></div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- PAINEL -->
+    <div class="section active" id="section-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-search"></i></div><div class="stat-label">Vagas Encontradas</div><div class="stat-value" id="stat-vagas">{{ estado.vagas_encontradas }}</div><div class="stat-sub" id="stat-busca-data">{{ estado.ultima_busca or 'Nenhuma busca' }}</div></div>
+        <div class="stat-card"><div class="stat-icon green"><i class="fas fa-envelope"></i></div><div class="stat-label">E-mails Enviados</div><div class="stat-value" id="stat-emails">{{ estado.enviados_email }}</div><div class="stat-sub" id="stat-envio-data">{{ estado.ultimo_envio or 'Nenhum envio' }}</div></div>
+        <div class="stat-card"><div class="stat-icon cyan"><i class="fab fa-whatsapp"></i></div><div class="stat-label">WhatsApp Enviados</div><div class="stat-value" id="stat-wpp">{{ estado.enviados_wpp }}</div><div class="stat-sub">Total acumulado</div></div>
+        <div class="stat-card"><div class="stat-icon orange"><i class="fas fa-users"></i></div><div class="stat-label">Contatos Pendentes</div><div class="stat-value" id="stat-pendentes">0</div><div class="stat-sub">Para envio</div></div>
+      </div>
+      <div class="actions-grid">
+        <div class="action-card">
+          <h3><i class="fas fa-search"></i> Buscar Vagas no Telegram</h3>
+          <p>Lê grupos do Telegram e extrai vagas com contatos de WhatsApp e e-mail.</p>
+          <div class="period-selector" id="period-selector">
+            <button class="period-btn selected" data-period="7">7 dias</button>
+            <button class="period-btn" data-period="30">30 dias</button>
+            <button class="period-btn" data-period="60">60 dias</button>
+            <button class="period-btn" data-period="90">90 dias</button>
+            <button class="period-btn" data-period="mes">Mês atual</button>
+          </div>
+          <button class="btn btn-primary" id="btn-buscar" onclick="iniciarBusca()"><i class="fas fa-play"></i> Iniciar Busca</button>
+        </div>
+        <div class="action-card">
+          <h3><i class="fas fa-paper-plane"></i> Enviar Currículos</h3>
+          <p>Envia o currículo por e-mail e WhatsApp para todos os contatos extraídos.</p>
+          <label class="checkbox-label"><input type="checkbox" id="modo-teste"> Modo Teste — Simular envio</label>
+          <button class="btn btn-warning" id="btn-enviar" onclick="iniciarEnvio()"><i class="fas fa-rocket"></i> Enviar Currículos</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h3><i class="fas fa-terminal"></i> Log em Tempo Real</h3><button class="btn btn-outline btn-sm" onclick="limparLog()"><i class="fas fa-eraser"></i> Limpar</button></div>
+        <div class="panel-body"><div class="log-container" id="log-container"><div class="log-entry"><span class="log-time">--:--</span><span class="log-msg info">Sistema pronto. Aguardando ações...</span></div></div></div>
+      </div>
+    </div>
+
+    <!-- VAGAS -->
+    <div class="section" id="section-vagas">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="flex-row"><h3><i class="fas fa-briefcase"></i> Vagas Encontradas</h3><span class="counter-badge" id="count-vagas">0</span></div>
+          <button class="btn btn-outline btn-sm" onclick="carregarVagas()"><i class="fas fa-sync-alt"></i> Atualizar</button>
+        </div>
+        <div class="filter-bar">
+          <input type="text" id="filtro-vagas" placeholder="Filtrar por cargo, empresa, bairro..." oninput="filtrarVagas()">
+          <select id="filtro-categoria" onchange="filtrarVagas()">
+            <option value="">Todas categorias</option>
+            <option>Administrativo</option>
+            <option>Operacional</option>
+            <option>Técnico</option>
+            <option>Geral</option>
+          </select>
+          <select id="filtro-periodo" onchange="filtrarVagas()">
+            <option value="">Todos os períodos</option>
+            <option>ÚLTIMOS 7 DIAS</option>
+            <option>ÚLTIMOS 15 DIAS</option>
+            <option>ÚLTIMOS 30 DIAS</option>
+            <option>30 A 60 DIAS</option>
+            <option>60 A 90 DIAS</option>
+          </select>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Cargo</th><th>Empresa</th><th>Bairro</th><th>Salário</th><th>Contrato</th><th>Contato</th><th>Período</th><th>Data</th></tr></thead>
+            <tbody id="tabela-vagas"><tr><td colspan="8"><div class="empty-state"><i class="fas fa-inbox"></i>Execute a busca para ver as vagas aqui</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTATOS -->
+    <div class="section" id="section-contatos">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="flex-row"><h3><i class="fas fa-address-book"></i> Contatos para Envio</h3><span class="counter-badge" id="count-contatos">0</span></div>
+          <button class="btn btn-outline btn-sm" onclick="carregarContatos()"><i class="fas fa-sync-alt"></i> Atualizar</button>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>#</th><th>Cargo</th><th>Empresa</th><th>WhatsApp</th><th>E-mail</th><th>Período</th></tr></thead>
+            <tbody id="tabela-contatos"><tr><td colspan="6"><div class="empty-state"><i class="fas fa-inbox"></i>Execute a busca primeiro para gerar contatos</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOG DE ENVIOS -->
+    <div class="section" id="section-envios">
+      <div class="grid-2" style="margin-bottom:14px">
+        <div class="stat-card"><div class="stat-icon green"><i class="fas fa-envelope"></i></div><div class="stat-label">E-mails Enviados</div><div class="stat-value" id="log-emails">0</div></div>
+        <div class="stat-card"><div class="stat-icon cyan"><i class="fab fa-whatsapp"></i></div><div class="stat-label">WhatsApp Enviados</div><div class="stat-value" id="log-wpp">0</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <div class="flex-row"><h3><i class="fas fa-history"></i> Histórico de Envios</h3><span class="counter-badge" id="count-envios">0</span></div>
+          <div class="flex-row"><button class="btn btn-outline btn-sm" onclick="carregarEnvios()"><i class="fas fa-sync-alt"></i> Atualizar</button><button class="btn btn-danger btn-sm" onclick="resetarContadores()"><i class="fas fa-trash"></i> Zerar</button></div>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Horário</th><th>Canal</th><th>Destino</th><th>Status</th></tr></thead>
+            <tbody id="tabela-envios"><tr><td colspan="4"><div class="empty-state"><i class="fas fa-inbox"></i>Sem envios registrados</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIG -->
+    <div class="section" id="section-config">
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-header"><h3><i class="fas fa-user"></i> Dados Pessoais</h3></div>
+          <div class="panel-body">
+            <div class="form-grid">
+              <div class="form-group full"><label>Nome Completo</label><input type="text" id="cfg-nome" value="{{ config.nome }}"></div>
+              <div class="form-group"><label>E-mail</label><input type="email" id="cfg-email" value="{{ config.email }}"></div>
+              <div class="form-group"><label>Telefone</label><input type="text" id="cfg-telefone" value="{{ config.telefone }}"></div>
+              <div class="form-group"><label>Cidade</label><input type="text" id="cfg-cidade" value="{{ config.cidade }}"></div>
+              <div class="form-group"><label>UF</label><input type="text" id="cfg-uf" value="{{ config.uf }}" maxlength="2"></div>
+              <div class="form-group full"><label>Escolaridade</label><select id="cfg-escolaridade"><option>Ensino Médio Completo</option><option>Ensino Superior Incompleto</option><option>Ensino Superior Completo</option></select></div>
+              <div class="form-group full"><label>Link do Currículo (Google Drive)</label><input type="url" id="cfg-link" value="{{ config.link_curriculo or '' }}"></div>
+            </div>
+            <button class="btn btn-primary mt-3" onclick="salvarConfig()"><i class="fas fa-save"></i> Salvar</button>
+          </div>
+        </div>
+        <div>
+          <div class="panel" style="margin-bottom:14px">
+            <div class="panel-header"><h3><i class="fas fa-file-pdf"></i> Currículo PDF</h3></div>
+            <div class="panel-body">
+              <div class="upload-zone" id="upload-zone" onclick="document.getElementById('input-pdf').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
+                <i class="fas fa-cloud-upload-alt"></i><p>Clique ou arraste o PDF aqui</p>
+              </div>
+              <input type="file" id="input-pdf" accept=".pdf" style="display:none" onchange="uploadPDF(this)">
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><h3><i class="fas fa-info-circle"></i> Como Usar</h3></div>
+            <div class="panel-body">
+              <ul class="info-list"><li>Configure seus dados pessoais</li><li>Faça upload do currículo PDF</li><li>Vá ao Painel → Buscar Vagas</li><li>Revise as vagas encontradas</li><li>Clique em Enviar Currículos</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="vagaModal" onclick="if(event.target===this)closeVagaModal()">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeVagaModal()">&times;</button>
+    <div id="vagaModalContent"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"><i id="toast-icon" class="fas fa-check-circle"></i><span id="toast-msg"></span></div>
+
+<script>
+// NAVIGATION
+const titles = { dashboard:'Painel', vagas:'Vagas Encontradas', contatos:'Contatos', envios:'Log de Envios', config:'Configurações' };
+function navigate(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('section-'+id).classList.add('active');
+  document.querySelector(`[onclick="navigate('${id}')"]`).classList.add('active');
+  document.getElementById('page-title').textContent = titles[id]||id;
+  if(id==='vagas')carregarVagas();
+  if(id==='contatos')carregarContatos();
+  if(id==='envios')carregarEnvios();
+}
+
+// CLOCK
+setInterval(()=>{document.getElementById('clock-display').textContent=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});},1000);
+
+// TOAST
+let toastTimer;
+function showToast(msg,ok=true){
+  clearTimeout(toastTimer);
+  document.getElementById('toast-icon').className='fas fa-'+(ok?'check-circle':'exclamation-circle');
+  document.getElementById('toast-msg').textContent=msg;
+  const el=document.getElementById('toast');
+  el.classList.add('show');
+  toastTimer=setTimeout(()=>el.classList.remove('show'),4000);
+}
+
+// PERIOD
+let selectedPeriod='7';
+document.getElementById('period-selector').addEventListener('click',e=>{
+  const btn=e.target.closest('.period-btn');
+  if(!btn)return;
+  document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedPeriod=btn.dataset.period;
+});
+
+// SSE LOG
+const logContainer=document.getElementById('log-container');
+function addLogEntry(entry){
+  if(entry.heartbeat)return;
+  const div=document.createElement('div');
+  div.className='log-entry';
+  div.innerHTML=`<span class="log-time">${entry.hora||'--:--'}</span><span class="log-msg ${entry.tipo||'info'}">${entry.msg||''}</span>`;
+  logContainer.appendChild(div);
+  logContainer.scrollTop=logContainer.scrollHeight;
+  while(logContainer.children.length>200)logContainer.removeChild(logContainer.firstChild);
+}
+function connectSSE(){
+  const es=new EventSource('/api/stream-log');
+  es.onmessage=e=>{try{addLogEntry(JSON.parse(e.data));}catch{}};
+  es.onerror=()=>{es.close();setTimeout(connectSSE,3000);};
+}
+connectSSE();
+
+// STATUS POLLING
+async function updateStatus(){
+  try{
+    const d=await(await fetch('/api/status')).json();
+    const db=document.getElementById('dot-busca'),de=document.getElementById('dot-envio');
+    db.className=d.buscando?'dot active':'dot';
+    document.getElementById('status-busca').textContent=d.buscando?'Buscando...':'Inativo';
+    de.className=d.enviando?'dot active':'dot';
+    document.getElementById('status-envio').textContent=d.enviando?'Enviando...':'Inativo';
+    document.getElementById('stat-vagas').textContent=d.vagas_encontradas||0;
+    document.getElementById('stat-emails').textContent=d.enviados_email||0;
+    document.getElementById('stat-wpp').textContent=d.enviados_wpp||0;
+    document.getElementById('stat-pendentes').textContent=d.contatos_pendentes||0;
+    document.getElementById('stat-busca-data').textContent=d.ultima_busca||'Nenhuma busca';
+    document.getElementById('stat-envio-data').textContent=d.ultimo_envio||'Nenhum envio';
+    const busy=d.buscando||d.enviando;
+    document.getElementById('btn-buscar').disabled=busy;
+    document.getElementById('btn-enviar').disabled=busy;
+  }catch{}
+}
+setInterval(updateStatus,2000);updateStatus();
+
+// ACTIONS
+async function iniciarBusca(){
+  const btn=document.getElementById('btn-buscar');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Buscando...';
+  try{
+    const r=await fetch('/api/buscar-vagas',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({periodo:selectedPeriod})});
+    const d=await r.json();
+    showToast(d.message,d.status==='ok');
+  }catch{showToast('Erro ao iniciar busca',false);}
+}
+async function iniciarEnvio(){
+  const teste=document.getElementById('modo-teste').checked;
+  if(!teste&&!confirm('Confirma o envio para todos os contatos?'))return;
+  const btn=document.getElementById('btn-enviar');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Enviando...';
+  try{
+    const r=await fetch('/api/enviar-curriculos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({modo_teste:teste})});
+    const d=await r.json();
+    showToast(d.message,d.status==='ok');
+  }catch{showToast('Erro ao iniciar envio',false);}
+}
+async function limparLog(){
+  if(!confirm('Limpar log?'))return;
+  await fetch('/api/limpar-log',{method:'POST'});
+  logContainer.innerHTML='';
+  showToast('Log limpo!');
+}
+
+// VAGAS
+let todasVagas=[];
+async function carregarVagas(){
+  const tb=document.getElementById('tabela-vagas');
+  tb.innerHTML='<tr><td colspan="8"><div class="empty-state"><span class="spinner"></span> Carregando...</div></td></tr>';
+  try{
+    const d=await(await fetch('/api/vagas')).json();
+    todasVagas=d.vagas||[];
+    document.getElementById('count-vagas').textContent=d.total||0;
+    renderizarVagas(todasVagas);
+  }catch{tb.innerHTML='<tr><td colspan="8"><div class="empty-state"><i class="fas fa-exclamation-triangle"></i>Erro</div></td></tr>';}
+}
+function renderizarVagas(vagas){
+  const tb=document.getElementById('tabela-vagas');
+  if(!vagas.length){tb.innerHTML='<tr><td colspan="8"><div class="empty-state"><i class="fas fa-inbox"></i>Nenhuma vaga</div></td></tr>';return;}
+  const pc={'ÚLTIMOS 7 DIAS':'badge-red','ÚLTIMOS 15 DIAS':'badge-orange','ÚLTIMOS 30 DIAS':'badge-cyan','30 A 60 DIAS':'badge-blue','60 A 90 DIAS':'badge-dark'};
+  const cc={'Administrativo':'badge-blue','Operacional':'badge-green','Técnico':'badge-cyan','Geral':'badge-dark'};
+  tb.innerHTML=vagas.map((v,i)=>{
+    let contato='';
+    if(v.whatsapp)contato+=`<div style="margin-bottom:2px"><a href="https://wa.me/55${(v.whatsapp||'').replace(/\D/g,'')}" target="_blank" style="color:#25D366;text-decoration:none;font-size:12px;font-weight:500">📞 WhatsApp</a></div>`;
+    if(v.email)contato+=`<div style="color:var(--text-muted);font-size:11px">${(v.email||'').substring(0,30)}</div>`;
+    if(!contato)contato='<span style="color:var(--text-muted)">—</span>';
+    const emp=v.empresa?`<span style="color:var(--text-primary);font-weight:500">${v.empresa.substring(0,25)}</span>`:'<span style="color:var(--text-muted)">—</span>';
+    const bai=v.bairro||'<span style="color:var(--text-muted)">—</span>';
+    const sal=v.salario?`<span style="color:var(--success);font-weight:600">${v.salario}</span>`:'<span style="color:var(--text-muted)">—</span>';
+    const con=v.contrato?`<span class="badge badge-dark" style="font-size:10px">${v.contrato}</span>`:'<span style="color:var(--text-muted)">—</span>';
+    return `<tr onclick="showVagaDetail(${i})" title="Clique para detalhes">
+      <td><strong>${(v.cargo||'').substring(0,40)}</strong><div style="font-size:10px;margin-top:3px;display:flex;gap:4px;flex-wrap:wrap"><span class="badge ${cc[v.categoria]||'badge-dark'}" style="font-size:9px;padding:2px 8px">${v.categoria||'Geral'}</span>${v.escolaridade?`<span class="badge badge-dark" style="font-size:9px;padding:2px 8px">🎓 ${v.escolaridade}</span>`:''}</div></td>
+      <td style="font-size:13px">${emp}</td>
+      <td style="font-size:12px">${bai}</td>
+      <td>${sal}</td>
+      <td>${con}</td>
+      <td style="font-size:11px">${contato}</td>
+      <td><span class="badge ${pc[v.periodo]||'badge-dark'}" style="font-size:10px">${v.periodo||'—'}</span></td>
+      <td style="color:var(--text-muted);font-size:12px">${v.data||''}</td>
+    </tr>`;
+  }).join('');
+  window._todasVagas=vagas;
+}
+function filtrarVagas(){
+  const q=document.getElementById('filtro-vagas').value.toLowerCase();
+  const p=document.getElementById('filtro-periodo').value;
+  const c=document.getElementById('filtro-categoria').value;
+  const filtradas=todasVagas.filter(v=>{
+    const t=`${v.cargo} ${v.empresa} ${v.bairro} ${v.descricao||''}`.toLowerCase();
+    return (!q||t.includes(q))&&(!p||v.periodo===p)&&(!c||v.categoria===c);
+  });
+  document.getElementById('count-vagas').textContent=filtradas.length;
+  renderizarVagas(filtradas);
+}
+
+// MODAL
+function showVagaDetail(i){
+  const v=window._todasVagas[i];
+  if(!v)return;
+  const c=document.getElementById('vagaModalContent');
+  const w=(v.whatsapp||'').replace(/\D/g,'');
+  c.innerHTML=`<h2>${v.cargo||'Vaga'}</h2>
+    <div class="modal-grid">
+      ${v.empresa?`<div><div class="modal-label">Empresa</div><div class="modal-value">${v.empresa}</div></div>`:''}
+      ${v.categoria?`<div><div class="modal-label">Categoria</div><div class="modal-value"><span class="badge badge-blue">${v.categoria}</span></div></div>`:''}
+      ${v.bairro?`<div><div class="modal-label">Bairro</div><div class="modal-value">📍 ${v.bairro}</div></div>`:''}
+      ${v.salario?`<div><div class="modal-label">Salário</div><div class="modal-value" style="color:var(--success)">💰 ${v.salario}</div></div>`:''}
+      ${v.contrato?`<div><div class="modal-label">Contrato</div><div class="modal-value">📄 ${v.contrato}</div></div>`:''}
+      ${v.escolaridade?`<div><div class="modal-label">Escolaridade</div><div class="modal-value">🎓 ${v.escolaridade}</div></div>`:''}
+      ${v.data?`<div><div class="modal-label">Data</div><div class="modal-value">📅 ${v.data} ${v.hora||''}</div></div>`:''}
+    </div>
+    ${v.descricao?`<div class="modal-section"><strong>📋 Descrição</strong><p>${v.descricao}</p></div>`:''}
+    ${v.atividades?`<div class="modal-section"><strong>✅ Atividades</strong><p>${v.atividades}</p></div>`:''}
+    ${v.requisitos?`<div class="modal-section"><strong>📌 Requisitos</strong><p>${v.requisitos}</p></div>`:''}
+    ${v.beneficios?`<div class="modal-section"><strong>🎁 Benefícios</strong><p>${v.beneficios}</p></div>`:''}
+    <div class="modal-actions">
+      ${w?`<a href="https://wa.me/55${w}" target="_blank" class="modal-btn modal-btn-wpp">📞 WhatsApp</a>`:''}
+      ${v.email?`<a href="mailto:${v.email}" class="modal-btn modal-btn-email">📧 Email</a>`:''}
+      ${v.link_mensagem?`<a href="${v.link_mensagem}" target="_blank" class="modal-btn modal-btn-tg">💬 Telegram</a>`:''}
+    </div>`;
+  document.getElementById('vagaModal').classList.add('active');
+  document.body.style.overflow='hidden';
+}
+function closeVagaModal(){
+  document.getElementById('vagaModal').classList.remove('active');
+  document.body.style.overflow='';
+}
+
+// CONTATOS
+async function carregarContatos(){
+  const tb=document.getElementById('tabela-contatos');
+  tb.innerHTML='<tr><td colspan="6"><div class="empty-state"><span class="spinner"></span> Carregando...</div></td></tr>';
+  try{
+    const d=await(await fetch('/api/contatos')).json();
+    const list=d.contatos||[];
+    document.getElementById('count-contatos').textContent=d.total||0;
+    if(!list.length){tb.innerHTML='<tr><td colspan="6"><div class="empty-state"><i class="fas fa-inbox"></i>Nenhum contato</div></td></tr>';return;}
+    tb.innerHTML=list.map((c,i)=>`<tr><td style="color:var(--text-muted)">${i+1}</td><td><strong>${c.cargo||'—'}</strong></td><td>${c.empresa||'—'}</td><td>${c.whatsapp?`<span style="color:var(--success)">📞 ${c.whatsapp}</span>`:'—'}</td><td style="color:var(--text-secondary)">${c.email||'—'}</td><td><span class="badge badge-blue">${c.periodo||'—'}</span></td></tr>`).join('');
+  }catch{tb.innerHTML='<tr><td colspan="6"><div class="empty-state"><i class="fas fa-exclamation-triangle"></i>Erro</div></td></tr>';}
+}
+
+// LOG ENVIOS
+async function carregarEnvios(){
+  try{
+    const d=await(await fetch('/api/log-envios')).json();
+    document.getElementById('log-emails').textContent=d.enviados_email||0;
+    document.getElementById('log-wpp').textContent=d.enviados_wpp||0;
+    const list=(d.detalhes||[]).slice().reverse();
+    document.getElementById('count-envios').textContent=list.length;
+    const tb=document.getElementById('tabela-envios');
+    if(!list.length){tb.innerHTML='<tr><td colspan="4"><div class="empty-state"><i class="fas fa-inbox"></i>Sem envios</div></td></tr>';return;}
+    tb.innerHTML=list.map(e=>`<tr><td style="font-family:var(--mono);font-size:12px;color:var(--text-muted)">${e.hora||'—'}</td><td><span class="badge ${e.canal==='email'?'badge-blue':'badge-green'}">${e.canal==='email'?'📧 E-mail':'📞 WhatsApp'}</span></td><td style="font-size:13px">${e.destino||'—'}</td><td><span class="badge badge-green">✓ ${e.status||'enviado'}</span></td></tr>`).join('');
+  }catch{}
+}
+async function resetarContadores(){
+  if(!confirm('Zerar contadores?'))return;
+  await fetch('/api/reset-contadores',{method:'POST'});
+  carregarEnvios();
+  showToast('Contadores zerados!');
+}
+
+// CONFIG
+async function salvarConfig(){
+  const body={
+    nome:document.getElementById('cfg-nome').value,
+    email:document.getElementById('cfg-email').value,
+    telefone:document.getElementById('cfg-telefone').value,
+    cidade:document.getElementById('cfg-cidade').value,
+    uf:document.getElementById('cfg-uf').value,
+    escolaridade:document.getElementById('cfg-escolaridade').value,
+    link_curriculo:document.getElementById('cfg-link').value,
+  };
+  try{
+    const r=await fetch('/api/configurar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d=await r.json();
+    showToast(d.message,d.status==='ok');
+  }catch{showToast('Erro ao salvar',false);}
+}
+async function uploadPDF(input){
+  const file=input.files[0];
+  if(!file)return;
+  const form=new FormData();
+  form.append('curriculo',file);
+  try{
+    const r=await fetch('/api/upload-curriculo',{method:'POST',body:form});
+    const d=await r.json();
+    showToast(d.message,d.status==='ok');
+  }catch{showToast('Erro no upload',false);}
+}
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('drag');
+  const files=e.dataTransfer.files;
+  if(files.length){const dt=new DataTransfer();dt.items.add(files[0]);document.getElementById('input-pdf').files=dt.files;uploadPDF(document.getElementById('input-pdf'));}
+}
+</script>
+</body>
+</html>

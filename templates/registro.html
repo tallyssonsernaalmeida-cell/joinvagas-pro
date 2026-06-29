@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Criar Conta{% endblock %}
+{% block content %}
+<div class="auth-card">
+    <div class="auth-header">
+        <div class="auth-logo">🚀</div>
+        <h1>Criar Conta</h1>
+        <p>Comece a automatizar suas candidaturas</p>
+    </div>
+    
+    {% if erro %}
+    <div class="error-message">
+        <i class="fas fa-exclamation-circle"></i>
+        {{ erro }}
+    </div>
+    {% endif %}
+    
+    <form method="POST" action="/registro" id="registroForm">
+        <div class="form-group">
+            <label>Nome de usuário</label>
+            <div class="input-wrapper">
+                <i class="fas fa-user input-icon"></i>
+                <input type="text" name="username" placeholder="Seu nome completo" required autofocus>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>E-mail</label>
+            <div class="input-wrapper">
+                <i class="fas fa-envelope input-icon"></i>
+                <input type="email" name="email" placeholder="seu@email.com" required>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>Senha</label>
+            <div class="input-wrapper">
+                <i class="fas fa-lock input-icon"></i>
+                <input type="password" name="senha" placeholder="Mínimo 6 caracteres" required minlength="6">
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-rocket"></i> Criar Conta Gratuita
+        </button>
+    </form>
+    
+    <div class="divider"><span>ou</span></div>
+    
+    <a href="/login" class="btn btn-outline">
+        <i class="fas fa-sign-in-alt"></i> Já tenho conta
+    </a>
+    
+    <div class="auth-footer">
+        Já tem conta? <a href="/login">Fazer login</a>
+    </div>
+    
+    <a href="/planos" class="plans-badge">
+        <i class="fas fa-crown"></i> Conheça os planos premium
+    </a>
+</div>
+
+<script>
+document.getElementById('registroForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData);
+    
+    if (data.senha.length < 6) {
+        alert('A senha deve ter pelo menos 6 caracteres');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/registro', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        
+        if (result.status === 'ok') {
+            window.location.href = result.redirect;
+        } else {
+            const existingError = document.querySelector('.error-message');
+            if (existingError) existingError.remove();
+            
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${result.message}`;
+            this.insertBefore(errorDiv, this.firstChild);
+        }
+    } catch (err) {
+        this.submit();
+    }
+});
+</script>
+{% endblock %}

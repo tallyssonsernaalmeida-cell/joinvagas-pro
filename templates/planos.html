@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - JoinVagas PRO</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #060b1a;
+            --bg-secondary: #0a1030;
+            --bg-card: #151d45;
+            --border-color: #1e2a55;
+            --text-primary: #e8edf5;
+            --text-secondary: #94a3c0;
+            --text-muted: #5c6e8f;
+            --accent: #3b82f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --radius: 12px;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 40px;
+        }
+        
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+        
+        .admin-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .admin-header h1 i {
+            color: var(--accent);
+        }
+        
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .stat-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 20px;
+        }
+        
+        .stat-box .stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        
+        .stat-box .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+        }
+        
+        .table-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead th {
+            background: var(--bg-secondary);
+            padding: 14px 20px;
+            text-align: left;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        tbody td {
+            padding: 14px 20px;
+            border-bottom: 1px solid rgba(30, 42, 85, 0.5);
+            font-size: 14px;
+        }
+        
+        tbody tr:hover td {
+            background: rgba(59, 130, 246, 0.03);
+        }
+        
+        .badge {
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .badge-admin { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+        .badge-premium { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+        .badge-gratuito { background: rgba(107, 114, 128, 0.15); color: #9ca3af; }
+        .badge-ativo { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.15s;
+        }
+        
+        .btn-sm {
+            padding: 4px 10px;
+            font-size: 11px;
+        }
+        
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: #000; }
+        .btn-danger { background: var(--danger); color: white; }
+        
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.15s;
+        }
+        
+        .back-btn:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <div>
+                <a href="/dashboard" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
+                </a>
+                <h1 style="margin-top: 16px;">
+                    <i class="fas fa-users-cog"></i> Gerenciar Usuários
+                </h1>
+            </div>
+        </div>
+        
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-label">Total Usuários</div>
+                <div class="stat-value" style="color: var(--accent);">{{ usuarios|length }}</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Premium</div>
+                <div class="stat-value" style="color: var(--warning);">
+                    {% set premium_count = usuarios|selectattr('plano', 'equalto', 'premium')|list|length + usuarios|selectattr('plano', 'equalto', 'vitalicio')|list|length %}
+                    {{ premium_count }}
+                </div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Gratuitos</div>
+                <div class="stat-value" style="color: var(--text-muted);">
+                    {{ usuarios|selectattr('plano', 'equalto', 'gratuito')|list|length }}
+                </div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Ativos Hoje</div>
+                <div class="stat-value" style="color: var(--success);">
+                    {% set hoje = now().strftime('%Y-%m-%d') if now is defined else '' %}
+                    {{ usuarios|selectattr('ultimo_login', 'string')|selectattr('ultimo_login', 'search', hoje)|list|length if hoje else 0 }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuário</th>
+                        <th>E-mail</th>
+                        <th>Plano</th>
+                        <th>Status</th>
+                        <th>Criado em</th>
+                        <th>Último Login</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in usuarios %}
+                    <tr>
+                        <td style="font-family: monospace; font-size: 12px; color: var(--text-muted);">
+                            {{ user.id }}
+                        </td>
+                        <td>
+                            <strong>{{ user.username }}</strong>
+                        </td>
+                        <td style="font-size: 13px; color: var(--text-secondary);">
+                            {{ user.email }}
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ user.plano }}">
+                                {{ user.plano | capitalize }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ 'ativo' if user.ativo else 'inativo' }}">
+                                {{ 'Ativo' if user.ativo else 'Inativo' }}
+                            </span>
+                        </td>
+                        <td style="font-size: 12px; color: var(--text-muted);">
+                            {{ user.data_criacao }}
+                        </td>
+                        <td style="font-size: 12px; color: var(--text-muted);">
+                            {{ user.ultimo_login }}
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 6px;">
+                                <button class="btn btn-sm btn-success" 
+                                        onclick="changePlan('{{ user.id }}', 'premium')"
+                                        title="Tornar Premium">
+                                    ⭐
+                                </button>
+                                <button class="btn btn-sm btn-warning" 
+                                        onclick="changePlan('{{ user.id }}', 'gratuito')"
+                                        title="Rebaixar para Gratuito">
+                                    ⬇
+                                </button>
+                                <button class="btn btn-sm btn-danger" 
+                                        onclick="deleteUser('{{ user.id }}')"
+                                        title="Remover Usuário">
+                                    🗑
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+    async function changePlan(userId, newPlan) {
+        if (!confirm(`Alterar plano do usuário ${userId} para ${newPlan}?`)) return;
+        
+        try {
+            const response = await fetch('/api/admin/toggle-plano', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId, plano: newPlan })
+            });
+            const data = await response.json();
+            alert(data.message);
+            if (data.status === 'ok') location.reload();
+        } catch (error) {
+            alert('Erro ao alterar plano');
+        }
+    }
+    
+    async function deleteUser(userId) {
+        if (!confirm(`Tem certeza que deseja remover o usuário ${userId}?`)) return;
+        alert('Funcionalidade em desenvolvimento');
+    }
+    </script>
+</body>
+</html>
