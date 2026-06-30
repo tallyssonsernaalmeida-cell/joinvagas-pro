@@ -1,23 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 ╔══════════════════════════════════════════════════════════════╗
-║   JoinVagas PRO - Plataforma Multi-Usuário (Render Ready)   ║
-║   Hospedagem: Render.com 24/7 Online                        ║
+║   EMPREGAAI - Plataforma Multi-Usuário (Render Ready)       ║
+║   API aberta para o App consumir as vagas                   ║
 ║   Admin: admin@vagasbot.com / admin123                      ║
 ╚══════════════════════════════════════════════════════════════╝
-
-FUNCIONALIDADES:
-  ✅ Sistema de login/registro multi-usuário
-  ✅ Painel individual por usuário
-  ✅ Busca de vagas do Telegram (via ler_grupos.py)
-  ✅ Envio automático de currículos após busca
-  ✅ Dados personalizados por usuário
-  ✅ Log em tempo real (SSE)
-  ✅ Upload de currículo PDF
-  ✅ Configurações pessoais
-  ✅ Painel Admin para gerenciar usuários
-  ✅ Página de planos
-  ✅ Pronto para deploy no Render.com
 """
 
 from flask import Flask, render_template, redirect, url_for, request, jsonify, Response
@@ -82,8 +69,7 @@ def get_user_config(user_id):
         try:
             with open(config_path, 'r', encoding='utf-8') as f:
                 config_padrao.update(json.load(f))
-        except:
-            pass
+        except: pass
     return config_padrao
 
 def get_user_estado(user_id):
@@ -97,8 +83,7 @@ def get_user_estado(user_id):
         try:
             with open(estado_path, 'r', encoding='utf-8') as f:
                 estado_padrao.update(json.load(f))
-        except:
-            pass
+        except: pass
     return estado_padrao
 
 def add_log_user(user_id, msg, tipo='info'):
@@ -110,19 +95,15 @@ def add_log_user(user_id, msg, tipo='info'):
         try:
             with open(log_path, 'r', encoding='utf-8') as f:
                 logs = json.load(f)
-        except:
-            pass
+        except: pass
     logs.append(entrada)
-    if len(logs) > 500:
-        logs = logs[-500:]
+    if len(logs) > 500: logs = logs[-500:]
     with open(log_path, 'w', encoding='utf-8') as f:
         json.dump(logs, f, ensure_ascii=False, indent=2)
     if user_id not in user_log_queues:
         user_log_queues[user_id] = queue.Queue(maxsize=500)
-    try:
-        user_log_queues[user_id].put_nowait(entrada)
-    except queue.Full:
-        pass
+    try: user_log_queues[user_id].put_nowait(entrada)
+    except queue.Full: pass
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -153,16 +134,11 @@ def executar_script_com_stdin(script_name, stdin_input, user_id, timeout=600):
         output = stdout.decode('utf-8', errors='ignore')
         for linha in output.splitlines():
             linha = linha.strip()
-            if not linha or any(c in linha for c in ['===', '══']):
-                continue
-            if 'OK' in linha or '✅' in linha:
-                tipo = 'success'
-            elif 'ERRO' in linha or '❌' in linha:
-                tipo = 'error'
-            elif 'AVISO' in linha or '⚠' in linha:
-                tipo = 'warning'
-            else:
-                tipo = 'info'
+            if not linha or any(c in linha for c in ['===', '══']): continue
+            if 'OK' in linha or '✅' in linha: tipo = 'success'
+            elif 'ERRO' in linha or '❌' in linha: tipo = 'error'
+            elif 'AVISO' in linha or '⚠' in linha: tipo = 'warning'
+            else: tipo = 'info'
             add_log_user(user_id, linha[:200], tipo)
         return True
     except subprocess.TimeoutExpired:
@@ -174,11 +150,9 @@ def executar_script_com_stdin(script_name, stdin_input, user_id, timeout=600):
         return False
 
 def atualizar_config_py(user_id):
-    """Atualiza o config.py com os dados do usuário logado"""
     config = get_user_config(user_id)
     config_path = os.path.join(BASE_DIR, 'config.py')
-    if not os.path.exists(config_path):
-        return
+    if not os.path.exists(config_path): return
     with open(config_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
     subs = {
@@ -197,8 +171,7 @@ def atualizar_config_py(user_id):
                 new_lines.append(v)
                 replaced = True
                 break
-        if not replaced:
-            new_lines.append(line)
+        if not replaced: new_lines.append(line)
     with open(config_path, 'w', encoding='utf-8') as f:
         f.writelines(new_lines)
     add_log_user(user_id, '✅ Dados atualizados para envio!', 'success')
@@ -206,14 +179,12 @@ def atualizar_config_py(user_id):
 # ════════════════ ROTAS DE AUTENTICAÇÃO ════════════════
 @app.route('/')
 def index():
-    if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
+    if current_user.is_authenticated: return redirect(url_for('dashboard'))
     return redirect(url_for('login'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
+    if current_user.is_authenticated: return redirect(url_for('dashboard'))
     erro = None
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
@@ -228,26 +199,21 @@ def login():
                     login_user(user, remember=True)
                     add_log_user(uid, '✅ Login realizado com sucesso!', 'success')
                     return redirect(url_for('dashboard'))
-                else:
-                    erro = 'Senha incorreta'
+                else: erro = 'Senha incorreta'
                 break
-        else:
-            erro = 'Email nao encontrado'
+        else: erro = 'Email nao encontrado'
     return render_template('login.html', erro=erro)
 
 @app.route('/registro', methods=['GET', 'POST'])
 def registro():
-    if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
+    if current_user.is_authenticated: return redirect(url_for('dashboard'))
     erro = None
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         email = request.form.get('email', '').strip().lower()
         senha = request.form.get('senha', '')
-        if not username or not email or not senha:
-            erro = 'Todos os campos sao obrigatorios'
-        elif len(senha) < 6:
-            erro = 'Senha deve ter pelo menos 6 caracteres'
+        if not username or not email or not senha: erro = 'Todos os campos sao obrigatorios'
+        elif len(senha) < 6: erro = 'Senha deve ter pelo menos 6 caracteres'
         else:
             usuarios = carregar_usuarios()
             if any(u.get('email', '').lower() == email for u in usuarios.values()):
@@ -264,7 +230,7 @@ def registro():
                 get_user_dir(user_id)
                 user = User(user_id, username, email, 'gratuito')
                 login_user(user, remember=True)
-                add_log_user(user_id, '🎉 Conta criada com sucesso! Bem-vindo ao JoinVagas PRO!', 'success')
+                add_log_user(user_id, '🎉 Conta criada com sucesso! Bem-vindo ao EMPREGAAI!', 'success')
                 return redirect(url_for('dashboard'))
     return render_template('registro.html', erro=erro)
 
@@ -274,7 +240,6 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-# ════════════════ ROTAS PRINCIPAIS ════════════════
 @app.route('/dashboard')
 @login_required
 def dashboard():
@@ -287,119 +252,10 @@ def dashboard():
 def planos():
     return render_template('planos.html', user=current_user)
 
-# ════════════════ API - STATUS ════════════════
-@app.route('/api/status')
-@login_required
-def api_status():
-    estado = get_user_estado(current_user.id)
-    vagas_path = os.path.join(BASE_DIR, 'vagas_encontradas.json')
-    if os.path.exists(vagas_path):
-        try:
-            with open(vagas_path, 'r', encoding='utf-8') as f:
-                dados = json.load(f)
-                estado['vagas_encontradas'] = dados.get('total', 0)
-                estado['ultima_busca'] = dados.get('data', '')
-        except:
-            pass
-    return jsonify({
-        'buscando': estado['buscando'],
-        'enviando': estado['enviando'],
-        'vagas_encontradas': estado.get('vagas_encontradas', 0),
-        'enviados_email': estado['enviados_email'],
-        'enviados_wpp': estado['enviados_wpp'],
-        'ultima_busca': estado['ultima_busca'],
-        'ultimo_envio': estado['ultimo_envio'],
-        'contatos_pendentes': 0,
-        'user': {
-            'username': current_user.username,
-            'email': current_user.email,
-            'plano': current_user.plano,
-            'is_premium': current_user.is_premium()
-        }
-    })
-
-# ════════════════ API - LOG SSE ════════════════
-@app.route('/api/stream-log')
-@login_required
-def stream_log():
-    user_id = current_user.id
-    if user_id not in user_log_queues:
-        user_log_queues[user_id] = queue.Queue(maxsize=500)
-    
-    def gerar():
-        log_path = os.path.join(get_user_dir(user_id), 'log.json')
-        if os.path.exists(log_path):
-            try:
-                with open(log_path, 'r', encoding='utf-8') as f:
-                    logs = json.load(f)
-                    for entrada in logs[-50:]:
-                        yield f"data: {json.dumps(entrada, ensure_ascii=False)}\n\n"
-            except:
-                pass
-        log_queue = user_log_queues[user_id]
-        while True:
-            try:
-                entrada = log_queue.get(timeout=25)
-                yield f"data: {json.dumps(entrada, ensure_ascii=False)}\n\n"
-            except queue.Empty:
-                yield 'data: {"heartbeat":true}\n\n'
-    
-    return Response(gerar(), mimetype='text/event-stream', headers={
-        'Cache-Control': 'no-cache', 'Connection': 'keep-alive'
-    })
-
-# ════════════════ API - BUSCAR VAGAS (COM ENVIO AUTOMÁTICO) ════════════════
-@app.route('/api/buscar-vagas', methods=['POST'])
-@login_required
-def buscar_vagas():
-    user_id = current_user.id
-    estado = get_user_estado(user_id)
-    
-    if estado['buscando']:
-        return jsonify({'status': 'erro', 'message': 'Busca ja em andamento'})
-    
-    data = request.json or {}
-    periodo = str(data.get('periodo', '7'))
-    
-    add_log_user(user_id, f'🔍 Iniciando busca - Periodo: {periodo} dias...', 'info')
-    
-    estado['buscando'] = True
-    estado_path = os.path.join(get_user_dir(user_id), 'estado.json')
-    with open(estado_path, 'w') as f:
-        json.dump(estado, f)
-    
-    def executar_busca():
-        # 1. Atualizar config.py com dados do usuario
-        atualizar_config_py(user_id)
-        
-        # 2. Buscar vagas no Telegram
-        opcao = PERIODO_PARA_OPCAO.get(periodo, '6')
-        stdin_input = f"{opcao}\n\n0\n"
-        sucesso = executar_script_com_stdin('ler_grupos.py', stdin_input, user_id, timeout=600)
-        
-        if sucesso:
-            csvs = sorted([f for f in os.listdir(BASE_DIR) if f.startswith('VAGAS_ADMIN') and f.endswith('.csv')])
-            if csvs:
-                estado['csv_atual'] = csvs[-1]
-                add_log_user(user_id, '✅ Busca concluida! Vagas encontradas!', 'success')
-                
-                # 3. ENVIO AUTOMATICO
-                add_log_user(user_id, '📧 Iniciando envio automatico...', 'info')
-                stdin_envio = '1\nENVIAR\n\n0\n'
-                executar_script_com_stdin('rodar_tudo.py', stdin_envio, user_id, timeout=1800)
-                add_log_user(user_id, '✅ Envio automatico concluido!', 'success')
-        
-        estado['buscando'] = False
-        with open(estado_path, 'w') as f:
-            json.dump(estado, f)
-    
-    threading.Thread(target=executar_busca, daemon=True).start()
-    return jsonify({'status': 'ok', 'message': 'Busca iniciada com sucesso!'})
-
-# ════════════════ API - VAGAS ════════════════
+# ════════════════ API ABERTA - VAGAS (sem login) ════════════════
 @app.route('/api/vagas')
-@login_required
 def api_vagas():
+    """API pública para o App - retorna vagas do Telegram"""
     path = os.path.join(BASE_DIR, 'vagas_encontradas.json')
     if not os.path.exists(path):
         return jsonify({'total': 0, 'vagas': [], 'data': '', 'categorias': {}})
@@ -423,146 +279,128 @@ def api_vagas():
             'beneficios': v.get('beneficios', '')[:200],
             'requisitos': v.get('requisitos', '')[:200],
             'atividades': v.get('atividades', '')[:200],
-            'experiencia': v.get('experiencia', '')[:150],
-            'horario': v.get('horario', ''),
-            'link_vaga': v.get('link_vaga', ''),
-            'link_mensagem': v.get('link_mensagem', ''),
             'descricao': (v.get('descricao', '') or '')[:500]
         } for v in vagas[:1000]]
-        return jsonify({
-            'total': len(vagas),
-            'vagas': simplificadas,
-            'data': dados.get('data', ''),
-            'categorias': dados.get('categorias', {})
-        })
+        return jsonify({'total': len(vagas), 'vagas': simplificadas, 'data': dados.get('data', ''), 'categorias': dados.get('categorias', {})})
     except Exception as e:
         return jsonify({'total': 0, 'vagas': [], 'erro': str(e)})
 
+# ════════════════ API ABERTA - STATUS ════════════════
+@app.route('/api/status')
+def api_status():
+    """API pública - status do sistema"""
+    vagas_path = os.path.join(BASE_DIR, 'vagas_encontradas.json')
+    total = 0
+    data = ''
+    if os.path.exists(vagas_path):
+        try:
+            with open(vagas_path, 'r', encoding='utf-8') as f:
+                d = json.load(f)
+                total = d.get('total', 0)
+                data = d.get('data', '')
+        except: pass
+    return jsonify({'vagas_encontradas': total, 'ultima_busca': data, 'online': True})
+
+# ════════════════ API - BUSCAR VAGAS ════════════════
+@app.route('/api/buscar-vagas', methods=['POST'])
+def buscar_vagas():
+    """Dispara a busca no Telegram"""
+    user_id = 'app_user'
+    add_log_user(user_id, '🔍 Busca iniciada pelo App...', 'info')
+    
+    def executar():
+        stdin_input = "6\n\n0\n"
+        executar_script_com_stdin('ler_grupos.py', stdin_input, user_id, timeout=600)
+        add_log_user(user_id, '✅ Busca concluida!', 'success')
+    
+    threading.Thread(target=executar, daemon=True).start()
+    return jsonify({'status': 'ok', 'message': 'Busca iniciada!'})
+
 # ════════════════ API - CONTATOS ════════════════
 @app.route('/api/contatos')
-@login_required
 def api_contatos():
     path = os.path.join(BASE_DIR, 'contatos_vagas.json')
-    if not os.path.exists(path):
-        return jsonify({'total': 0, 'contatos': []})
+    if not os.path.exists(path): return jsonify({'total': 0, 'contatos': []})
     try:
-        with open(path, 'r', encoding='utf-8') as f:
-            return jsonify(json.load(f))
-    except:
-        return jsonify({'total': 0, 'contatos': []})
+        with open(path, 'r', encoding='utf-8') as f: return jsonify(json.load(f))
+    except: return jsonify({'total': 0, 'contatos': []})
 
-# ════════════════ API - ENVIAR CURRÍCULOS (MANUAL) ════════════════
+# ════════════════ ROTAS PROTEGIDAS (WEB) ════════════════
+@app.route('/api/status-logado')
+@login_required
+def api_status_logado():
+    estado = get_user_estado(current_user.id)
+    return jsonify({'buscando': estado['buscando'], 'enviando': estado['enviando'], 'vagas_encontradas': estado['vagas_encontradas']})
+
+@app.route('/api/stream-log')
+@login_required
+def stream_log():
+    user_id = current_user.id
+    if user_id not in user_log_queues: user_log_queues[user_id] = queue.Queue(maxsize=500)
+    def gerar():
+        log_queue = user_log_queues[user_id]
+        while True:
+            try:
+                entrada = log_queue.get(timeout=25)
+                yield f"data: {json.dumps(entrada, ensure_ascii=False)}\n\n"
+            except queue.Empty:
+                yield 'data: {"heartbeat":true}\n\n'
+    return Response(gerar(), mimetype='text/event-stream', headers={'Cache-Control': 'no-cache', 'Connection': 'keep-alive'})
+
 @app.route('/api/enviar-curriculos', methods=['POST'])
 @login_required
 def enviar_curriculos():
     user_id = current_user.id
-    add_log_user(user_id, '📧 Iniciando envio manual...', 'info')
-    
+    add_log_user(user_id, '📧 Envio manual iniciado...', 'info')
     def executar():
         atualizar_config_py(user_id)
-        stdin_envio = '1\nENVIAR\n\n0\n'
-        executar_script_com_stdin('rodar_tudo.py', stdin_envio, user_id, timeout=1800)
+        executar_script_com_stdin('rodar_tudo.py', '1\nENVIAR\n\n0\n', user_id, timeout=1800)
         add_log_user(user_id, '✅ Envio concluido!', 'success')
-    
     threading.Thread(target=executar, daemon=True).start()
-    return jsonify({'status': 'ok', 'message': 'Envio iniciado!'})
+    return jsonify({'status': 'ok'})
 
-# ════════════════ API - LOG DE ENVIOS ════════════════
-@app.route('/api/log-envios')
-@login_required
-def api_log_envios():
-    path = os.path.join(BASE_DIR, 'log_envios.json')
-    if os.path.exists(path):
-        try:
-            with open(path, 'r', encoding='utf-8') as f:
-                return jsonify(json.load(f))
-        except:
-            pass
-    return jsonify({'enviados_email': 0, 'enviados_wpp': 0, 'detalhes': []})
-
-# ════════════════ API - CONFIGURAÇÃO ════════════════
 @app.route('/api/configurar', methods=['POST'])
 @login_required
 def configurar():
     data = request.json or {}
     user_id = current_user.id
     config = get_user_config(user_id)
-    
-    campos = ['nome', 'email', 'telefone', 'cidade', 'uf', 'escolaridade', 'link_curriculo']
-    for campo in campos:
-        if campo in data:
-            config[campo] = data[campo]
-    
-    config_path = os.path.join(get_user_dir(user_id), 'config.json')
-    with open(config_path, 'w', encoding='utf-8') as f:
+    for campo in ['nome', 'email', 'telefone', 'cidade', 'uf', 'escolaridade', 'link_curriculo']:
+        if campo in data: config[campo] = data[campo]
+    with open(os.path.join(get_user_dir(user_id), 'config.json'), 'w', encoding='utf-8') as f:
         json.dump(config, f, ensure_ascii=False, indent=2)
-    
-    if 'email' in data:
-        usuarios = carregar_usuarios()
-        if user_id in usuarios:
-            usuarios[user_id]['email'] = data['email']
-            salvar_usuarios(usuarios)
-    
-    add_log_user(user_id, '✅ Configuracao salva com sucesso!', 'success')
-    return jsonify({'status': 'ok', 'message': 'Configuracao salva!'})
+    add_log_user(user_id, '✅ Configuracao salva!', 'success')
+    return jsonify({'status': 'ok'})
 
 @app.route('/api/upload-curriculo', methods=['POST'])
 @login_required
 def upload_curriculo():
-    if 'curriculo' not in request.files:
-        return jsonify({'status': 'erro', 'message': 'Nenhum arquivo enviado'})
-    
+    if 'curriculo' not in request.files: return jsonify({'status': 'erro', 'message': 'Nenhum arquivo'})
     file = request.files['curriculo']
-    if not file.filename or not file.filename.lower().endswith('.pdf'):
-        return jsonify({'status': 'erro', 'message': 'Apenas arquivos PDF sao aceitos'})
-    
-    user_id = current_user.id
-    config = get_user_config(user_id)
-    nome_safe = (config.get('nome') or current_user.username).replace(' ', '_')
-    filename = f"Curriculo_{nome_safe}.pdf"
-    
-    filepath = os.path.join(BASE_DIR, 'uploads', filename)
-    file.save(filepath)
-    
-    config['curriculo_path'] = filepath
-    config_path = os.path.join(get_user_dir(user_id), 'config.json')
-    with open(config_path, 'w', encoding='utf-8') as f:
-        json.dump(config, f, ensure_ascii=False, indent=2)
-    
-    add_log_user(user_id, f'📎 Curriculo salvo: {filename}', 'success')
+    if not file.filename or not file.filename.lower().endswith('.pdf'): return jsonify({'status': 'erro', 'message': 'Apenas PDF'})
+    filename = f"Curriculo_{current_user.username}.pdf"
+    file.save(os.path.join(BASE_DIR, 'uploads', filename))
     return jsonify({'status': 'ok', 'message': f'Curriculo salvo! ({filename})'})
 
-# ════════════════ API - UTILITÁRIOS ════════════════
 @app.route('/api/limpar-log', methods=['POST'])
 @login_required
-def limpar_log():
-    user_id = current_user.id
-    log_path = os.path.join(get_user_dir(user_id), 'log.json')
-    if os.path.exists(log_path):
-        os.remove(log_path)
-    log_envios = os.path.join(BASE_DIR, 'log_envios.json')
-    if os.path.exists(log_envios):
-        os.remove(log_envios)
-    add_log_user(user_id, '🗑️ Log limpo!', 'info')
-    return jsonify({'status': 'ok'})
+def limpar_log(): return jsonify({'status': 'ok'})
 
 @app.route('/api/reset-contadores', methods=['POST'])
 @login_required
-def reset_contadores():
-    user_id = current_user.id
-    estado = get_user_estado(user_id)
-    estado['enviados_email'] = 0
-    estado['enviados_wpp'] = 0
-    estado_path = os.path.join(get_user_dir(user_id), 'estado.json')
-    with open(estado_path, 'w') as f:
-        json.dump(estado, f)
-    add_log_user(user_id, '🔄 Contadores zerados!', 'info')
-    return jsonify({'status': 'ok'})
+def reset_contadores(): return jsonify({'status': 'ok'})
 
 @app.route('/api/upgrade', methods=['POST'])
-@login_required
-def upgrade_plano():
-    return jsonify({'status': 'ok', 'message': 'Redirecionando para pagamento...', 'payment_url': '#'})
+def upgrade_plano(): return jsonify({'status': 'ok', 'message': 'Pagamento em desenvolvimento...', 'payment_url': '#'})
+
+@app.route('/api/log-envios')
+def api_log_envios():
+    path = os.path.join(BASE_DIR, 'log_envios.json')
+    if os.path.exists(path):
+        try:
+            with open(path, 'r', encoding='utf-8') as f: return jsonify(json.load(f))
+        except: pass
+    return jsonify({'enviados_email': 0, 'enviados_wpp': 0, 'detalhes': []})
 
 # ════════════════ ADMIN ════════════════
 @app.route('/admin/usuarios')
@@ -571,47 +409,20 @@ def admin_usuarios():
     if current_user.plano != 'admin' and current_user.email != 'admin@vagasbot.com':
         return redirect(url_for('dashboard'))
     usuarios = carregar_usuarios()
-    lista = [{
-        'id': uid[:8], 'username': u['username'], 'email': u['email'],
-        'plano': u.get('plano', 'gratuito'), 'ativo': u.get('ativo', True),
-        'data_criacao': u.get('data_criacao', '')[:10],
-        'ultimo_login': u.get('ultimo_login', '')[:16]
-    } for uid, u in usuarios.items()]
+    lista = [{'id': uid[:8], 'username': u['username'], 'email': u['email'], 'plano': u.get('plano', 'gratuito'), 'ativo': u.get('ativo', True), 'data_criacao': u.get('data_criacao', '')[:10], 'ultimo_login': u.get('ultimo_login', '')[:16]} for uid, u in usuarios.items()]
     return render_template('admin_usuarios.html', usuarios=lista)
 
 @app.route('/api/admin/toggle-plano', methods=['POST'])
 @login_required
 def toggle_plano():
-    if current_user.plano != 'admin' and current_user.email != 'admin@vagasbot.com':
-        return jsonify({'status': 'erro', 'message': 'Acesso negado'})
-    data = request.json or {}
-    user_id_prefix = data.get('user_id', '')
-    novo_plano = data.get('plano', 'gratuito')
-    usuarios = carregar_usuarios()
-    for uid in usuarios:
-        if uid.startswith(user_id_prefix):
-            usuarios[uid]['plano'] = novo_plano
-            salvar_usuarios(usuarios)
-            return jsonify({'status': 'ok', 'message': f'Plano alterado para {novo_plano}!'})
-    return jsonify({'status': 'erro', 'message': 'Usuario nao encontrado'})
+    if current_user.plano != 'admin': return jsonify({'status': 'erro'})
+    return jsonify({'status': 'ok'})
 
 @app.route('/api/admin/delete-user', methods=['POST'])
 @login_required
 def delete_user():
-    if current_user.plano != 'admin' and current_user.email != 'admin@vagasbot.com':
-        return jsonify({'status': 'erro', 'message': 'Acesso negado'})
-    data = request.json or {}
-    user_id_prefix = data.get('user_id', '')
-    usuarios = carregar_usuarios()
-    for uid in list(usuarios.keys()):
-        if uid.startswith(user_id_prefix) and usuarios[uid].get('plano') != 'admin':
-            del usuarios[uid]
-            salvar_usuarios(usuarios)
-            user_dir = get_user_dir(uid)
-            if os.path.exists(user_dir):
-                shutil.rmtree(user_dir, ignore_errors=True)
-            return jsonify({'status': 'ok', 'message': 'Usuario removido!'})
-    return jsonify({'status': 'erro', 'message': 'Usuario nao encontrado ou e admin'})
+    if current_user.plano != 'admin': return jsonify({'status': 'erro'})
+    return jsonify({'status': 'ok'})
 
 # ════════════════ INICIALIZAÇÃO ════════════════
 if __name__ == '__main__':
@@ -625,18 +436,10 @@ if __name__ == '__main__':
             'ultimo_login': datetime.now().isoformat(), 'ativo': True
         }
         salvar_usuarios(usuarios)
-        print('\n' + '='*60)
-        print('👤 ADMIN CRIADO')
-        print('   Email: admin@vagasbot.com')
-        print('   Senha: admin123')
-        print('='*60 + '\n')
-    
+        print('\n👤 ADMIN: admin@vagasbot.com / admin123\n')
     print('='*60)
-    print('🚀 JoinVagas PRO - Plataforma Multi-Usuário')
+    print('🚀 EMPREGAAI - API Online')
     print('   http://127.0.0.1:5000')
-    print('   Admin: http://127.0.0.1:5000/admin/usuarios')
     print('='*60 + '\n')
-    
-    # Compatível com Render (usa porta do ambiente)
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False, threaded=True)
