@@ -34,8 +34,8 @@ user_log_queues = {}
 # ════════════════ VARIÁVEIS GLOBAIS ════════════════
 ultima_busca = None
 busca_em_andamento = False
-VERSAO_APP = "1.0.2"  # Versão atual do App
-FORCE_UPDATE = True   # True = força atualização
+VERSAO_APP = "1.0.0"  # Versão atual do App
+FORCE_UPDATE = False   # True = força atualização
 
 # ════════════════ MODELO DE USUÁRIO ════════════════
 class User(UserMixin):
