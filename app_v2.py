@@ -470,3 +470,7 @@ if __name__ == '__main__':
     
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False, threaded=True)
+
+    git add app_v2.py
+    git commit -m "Forcar reinicio do servidor"
+    git push
