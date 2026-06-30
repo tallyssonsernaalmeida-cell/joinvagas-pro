@@ -2,6 +2,7 @@
 """
 ╔══════════════════════════════════════════════════════════════╗
 ║   EMPREGAAI - Plataforma Multi-Usuário (Render Ready)       ║
+║   Worker automático a cada 30 minutos                        ║
 ║   API aberta para o App consumir as vagas                   ║
 ║   Admin: admin@vagasbot.com / admin123                      ║
 ╚══════════════════════════════════════════════════════════════╝
@@ -10,7 +11,7 @@
 from flask import Flask, render_template, redirect, url_for, request, jsonify, Response
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-import os, json, uuid, threading, queue, sys, subprocess, shutil
+import os, json, uuid, threading, queue, sys, subprocess, shutil, time
 from datetime import datetime
 
 # ════════════════ CONFIGURAÇÃO ════════════════
@@ -29,6 +30,10 @@ os.makedirs('data', exist_ok=True)
 os.makedirs('user_data', exist_ok=True)
 
 user_log_queues = {}
+
+# ════════════════ VARIÁVEIS GLOBAIS DO WORKER ════════════════
+ultima_busca = None
+busca_em_andamento = False
 
 # ════════════════ MODELO DE USUÁRIO ════════════════
 class User(UserMixin):
@@ -113,40 +118,88 @@ def load_user(user_id):
         return User(user_id, u['username'], u['email'], u.get('plano', 'gratuito'))
     return None
 
-# ════════════════ EXECUÇÃO DE SCRIPTS ════════════════
-PERIODO_PARA_OPCAO = {'7': '6', '30': '2', '60': '3', '90': '4', 'mes': '5'}
+# ════════════════ WORKER AUTOMÁTICO ════════════════
+def worker_busca_automatica():
+    """Worker que busca vagas a cada 30 minutos"""
+    global busca_em_andamento, ultima_busca
+    
+    # Aguardar o servidor iniciar completamente
+    time.sleep(10)
+    print("🔄 Worker automático iniciado (busca a cada 30 min)")
+    
+    while True:
+        try:
+            agora = datetime.now()
+            
+            # Verificar se precisa buscar (30 minutos = 1800 segundos)
+            precisa_buscar = False
+            if ultima_busca is None:
+                precisa_buscar = True
+            elif (agora - ultima_busca).total_seconds() > 1800:
+                precisa_buscar = True
+            
+            if precisa_buscar and not busca_em_andamento:
+                busca_em_andamento = True
+                print(f"\n🔍 [AUTO] Buscando vagas - {agora.strftime('%H:%M:%S')}")
+                
+                try:
+                    stdin_input = "6\n\n0\n"  # Opção 6 = últimos 7 dias
+                    env = os.environ.copy()
+                    env['PYTHONIOENCODING'] = 'utf-8'
+                    env['PYTHONUTF8'] = '1'
+                    
+                    proc = subprocess.Popen(
+                        [sys.executable, '-X', 'utf8', os.path.join(BASE_DIR, 'ler_grupos.py')],
+                        stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                        stderr=subprocess.STDOUT, cwd=BASE_DIR, env=env
+                    )
+                    stdout, _ = proc.communicate(input=stdin_input.encode('utf-8'), timeout=300)
+                    
+                    # Verificar se gerou CSV
+                    csvs = sorted([f for f in os.listdir(BASE_DIR) if f.startswith('VAGAS_ADMIN') and f.endswith('.csv')])
+                    if csvs:
+                        total = 0
+                        vagas_path = os.path.join(BASE_DIR, 'vagas_encontradas.json')
+                        if os.path.exists(vagas_path):
+                            with open(vagas_path, 'r', encoding='utf-8') as f:
+                                total = json.load(f).get('total', 0)
+                        print(f"✅ [AUTO] Busca concluída! {total} vagas encontradas. Arquivo: {csvs[-1]}")
+                    
+                    ultima_busca = datetime.now()
+                    
+                except subprocess.TimeoutExpired:
+                    proc.kill()
+                    print("⏱️ [AUTO] Timeout na busca")
+                except Exception as e:
+                    print(f"❌ [AUTO] Erro: {e}")
+                
+                busca_em_andamento = False
+            
+            time.sleep(60)  # Verificar a cada 1 minuto
+            
+        except Exception as e:
+            print(f"❌ [AUTO] Erro crítico no worker: {e}")
+            time.sleep(60)
 
-def executar_script_com_stdin(script_name, stdin_input, user_id, timeout=600):
-    script = os.path.join(BASE_DIR, script_name)
-    if not os.path.exists(script):
-        add_log_user(user_id, f'Script {script_name} nao encontrado!', 'error')
-        return False
+# ════════════════ FUNÇÃO DE BUSCA ════════════════
+def executar_busca_telegram():
+    """Executa a busca no Telegram e retorna True se sucesso"""
+    global ultima_busca
     try:
+        stdin_input = "6\n\n0\n"
         env = os.environ.copy()
         env['PYTHONIOENCODING'] = 'utf-8'
         env['PYTHONUTF8'] = '1'
+        
         proc = subprocess.Popen(
-            [sys.executable, '-X', 'utf8', script],
+            [sys.executable, '-X', 'utf8', os.path.join(BASE_DIR, 'ler_grupos.py')],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT, cwd=BASE_DIR, env=env
         )
-        stdout, _ = proc.communicate(input=stdin_input.encode('utf-8'), timeout=timeout)
-        output = stdout.decode('utf-8', errors='ignore')
-        for linha in output.splitlines():
-            linha = linha.strip()
-            if not linha or any(c in linha for c in ['===', '══']): continue
-            if 'OK' in linha or '✅' in linha: tipo = 'success'
-            elif 'ERRO' in linha or '❌' in linha: tipo = 'error'
-            elif 'AVISO' in linha or '⚠' in linha: tipo = 'warning'
-            else: tipo = 'info'
-            add_log_user(user_id, linha[:200], tipo)
+        proc.communicate(input=stdin_input.encode('utf-8'), timeout=300)
+        ultima_busca = datetime.now()
         return True
-    except subprocess.TimeoutExpired:
-        proc.kill()
-        add_log_user(user_id, f'Timeout: {script_name}', 'error')
-        return False
-    except Exception as e:
-        add_log_user(user_id, f'Erro: {str(e)}', 'error')
+    except:
         return False
 
 def atualizar_config_py(user_id):
@@ -174,7 +227,6 @@ def atualizar_config_py(user_id):
         if not replaced: new_lines.append(line)
     with open(config_path, 'w', encoding='utf-8') as f:
         f.writelines(new_lines)
-    add_log_user(user_id, '✅ Dados atualizados para envio!', 'success')
 
 # ════════════════ ROTAS DE AUTENTICAÇÃO ════════════════
 @app.route('/')
@@ -230,7 +282,6 @@ def registro():
                 get_user_dir(user_id)
                 user = User(user_id, username, email, 'gratuito')
                 login_user(user, remember=True)
-                add_log_user(user_id, '🎉 Conta criada com sucesso! Bem-vindo ao EMPREGAAI!', 'success')
                 return redirect(url_for('dashboard'))
     return render_template('registro.html', erro=erro)
 
@@ -252,10 +303,10 @@ def dashboard():
 def planos():
     return render_template('planos.html', user=current_user)
 
-# ════════════════ API ABERTA - VAGAS (sem login) ════════════════
+# ════════════════ API PÚBLICA - VAGAS ════════════════
 @app.route('/api/vagas')
 def api_vagas():
-    """API pública para o App - retorna vagas do Telegram"""
+    """API pública - retorna vagas do Telegram"""
     path = os.path.join(BASE_DIR, 'vagas_encontradas.json')
     if not os.path.exists(path):
         return jsonify({'total': 0, 'vagas': [], 'data': '', 'categorias': {}})
@@ -281,40 +332,55 @@ def api_vagas():
             'atividades': v.get('atividades', '')[:200],
             'descricao': (v.get('descricao', '') or '')[:500]
         } for v in vagas[:1000]]
-        return jsonify({'total': len(vagas), 'vagas': simplificadas, 'data': dados.get('data', ''), 'categorias': dados.get('categorias', {})})
+        return jsonify({
+            'total': len(vagas), 'vagas': simplificadas,
+            'data': dados.get('data', ''), 'categorias': dados.get('categorias', {}),
+            'ultima_busca': ultima_busca.strftime('%d/%m/%Y %H:%M') if ultima_busca else 'Nunca'
+        })
     except Exception as e:
         return jsonify({'total': 0, 'vagas': [], 'erro': str(e)})
 
-# ════════════════ API ABERTA - STATUS ════════════════
+# ════════════════ API - STATUS ════════════════
 @app.route('/api/status')
 def api_status():
-    """API pública - status do sistema"""
     vagas_path = os.path.join(BASE_DIR, 'vagas_encontradas.json')
     total = 0
-    data = ''
     if os.path.exists(vagas_path):
         try:
             with open(vagas_path, 'r', encoding='utf-8') as f:
-                d = json.load(f)
-                total = d.get('total', 0)
-                data = d.get('data', '')
+                total = json.load(f).get('total', 0)
         except: pass
-    return jsonify({'vagas_encontradas': total, 'ultima_busca': data, 'online': True})
+    return jsonify({
+        'online': True,
+        'vagas_encontradas': total,
+        'ultima_busca': ultima_busca.strftime('%d/%m/%Y %H:%M') if ultima_busca else 'Nunca',
+        'buscando_agora': busca_em_andamento
+    })
 
 # ════════════════ API - BUSCAR VAGAS ════════════════
 @app.route('/api/buscar-vagas', methods=['POST'])
 def buscar_vagas():
-    """Dispara a busca no Telegram"""
-    user_id = 'app_user'
-    add_log_user(user_id, '🔍 Busca iniciada pelo App...', 'info')
+    """Dispara busca manual (se não tiver busca em andamento)"""
+    global busca_em_andamento
+    
+    if busca_em_andamento:
+        return jsonify({
+            'status': 'ok',
+            'message': 'Busca já em andamento. Aguarde alguns instantes.',
+            'buscando': True
+        })
     
     def executar():
-        stdin_input = "6\n\n0\n"
-        executar_script_com_stdin('ler_grupos.py', stdin_input, user_id, timeout=600)
-        add_log_user(user_id, '✅ Busca concluida!', 'success')
+        global busca_em_andamento
+        busca_em_andamento = True
+        executar_busca_telegram()
+        busca_em_andamento = False
     
     threading.Thread(target=executar, daemon=True).start()
-    return jsonify({'status': 'ok', 'message': 'Busca iniciada!'})
+    return jsonify({
+        'status': 'ok',
+        'message': 'Busca iniciada! As vagas estarão disponíveis em até 2 minutos.'
+    })
 
 # ════════════════ API - CONTATOS ════════════════
 @app.route('/api/contatos')
@@ -326,12 +392,6 @@ def api_contatos():
     except: return jsonify({'total': 0, 'contatos': []})
 
 # ════════════════ ROTAS PROTEGIDAS (WEB) ════════════════
-@app.route('/api/status-logado')
-@login_required
-def api_status_logado():
-    estado = get_user_estado(current_user.id)
-    return jsonify({'buscando': estado['buscando'], 'enviando': estado['enviando'], 'vagas_encontradas': estado['vagas_encontradas']})
-
 @app.route('/api/stream-log')
 @login_required
 def stream_log():
@@ -351,11 +411,15 @@ def stream_log():
 @login_required
 def enviar_curriculos():
     user_id = current_user.id
-    add_log_user(user_id, '📧 Envio manual iniciado...', 'info')
     def executar():
         atualizar_config_py(user_id)
-        executar_script_com_stdin('rodar_tudo.py', '1\nENVIAR\n\n0\n', user_id, timeout=1800)
-        add_log_user(user_id, '✅ Envio concluido!', 'success')
+        try:
+            env = os.environ.copy()
+            env['PYTHONIOENCODING'] = 'utf-8'
+            proc = subprocess.Popen([sys.executable, os.path.join(BASE_DIR, 'rodar_tudo.py')],
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=BASE_DIR, env=env)
+            proc.communicate(input=b'1\nENVIAR\n\n0\n', timeout=1800)
+        except: pass
     threading.Thread(target=executar, daemon=True).start()
     return jsonify({'status': 'ok'})
 
@@ -369,18 +433,17 @@ def configurar():
         if campo in data: config[campo] = data[campo]
     with open(os.path.join(get_user_dir(user_id), 'config.json'), 'w', encoding='utf-8') as f:
         json.dump(config, f, ensure_ascii=False, indent=2)
-    add_log_user(user_id, '✅ Configuracao salva!', 'success')
     return jsonify({'status': 'ok'})
 
 @app.route('/api/upload-curriculo', methods=['POST'])
 @login_required
 def upload_curriculo():
-    if 'curriculo' not in request.files: return jsonify({'status': 'erro', 'message': 'Nenhum arquivo'})
+    if 'curriculo' not in request.files: return jsonify({'status': 'erro'})
     file = request.files['curriculo']
-    if not file.filename or not file.filename.lower().endswith('.pdf'): return jsonify({'status': 'erro', 'message': 'Apenas PDF'})
+    if not file.filename or not file.filename.lower().endswith('.pdf'): return jsonify({'status': 'erro'})
     filename = f"Curriculo_{current_user.username}.pdf"
     file.save(os.path.join(BASE_DIR, 'uploads', filename))
-    return jsonify({'status': 'ok', 'message': f'Curriculo salvo! ({filename})'})
+    return jsonify({'status': 'ok'})
 
 @app.route('/api/limpar-log', methods=['POST'])
 @login_required
@@ -409,7 +472,7 @@ def admin_usuarios():
     if current_user.plano != 'admin' and current_user.email != 'admin@vagasbot.com':
         return redirect(url_for('dashboard'))
     usuarios = carregar_usuarios()
-    lista = [{'id': uid[:8], 'username': u['username'], 'email': u['email'], 'plano': u.get('plano', 'gratuito'), 'ativo': u.get('ativo', True), 'data_criacao': u.get('data_criacao', '')[:10], 'ultimo_login': u.get('ultimo_login', '')[:16]} for uid, u in usuarios.items()]
+    lista = [{'id': uid[:8], 'username': u['username'], 'email': u['email'], 'plano': u.get('plano', 'gratuito'), 'ativo': u.get('ativo', True)} for uid, u in usuarios.items()]
     return render_template('admin_usuarios.html', usuarios=lista)
 
 @app.route('/api/admin/toggle-plano', methods=['POST'])
@@ -437,9 +500,16 @@ if __name__ == '__main__':
         }
         salvar_usuarios(usuarios)
         print('\n👤 ADMIN: admin@vagasbot.com / admin123\n')
+    
     print('='*60)
-    print('🚀 EMPREGAAI - API Online')
+    print('🚀 EMPREGAAI - API Online com Worker Automático')
+    print('   Worker: busca a cada 30 minutos')
     print('   http://127.0.0.1:5000')
     print('='*60 + '\n')
+    
+    # Iniciar worker automático em background
+    worker_thread = threading.Thread(target=worker_busca_automatica, daemon=True)
+    worker_thread.start()
+    
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False, threaded=True)
